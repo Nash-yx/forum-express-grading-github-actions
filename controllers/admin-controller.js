@@ -59,8 +59,25 @@ const adminController = {
       const restaurant = await Restaurant.findByPk(req.params.id)
       if (!restaurant) throw new Error("Restaurant didn't exist!")
 
-      await restaurant.update({ name, tel, address, openingHours, description })
+      await restaurant.update({
+        name,
+        tel,
+        address,
+        openingHours,
+        description
+      })
       req.flash('success_messages', 'restaurant was successfully to updated')
+      return res.redirect('/admin/restaurants')
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteRestaurant: async (req, res, next) => {
+    try {
+      const restaurant = await Restaurant.findByPk(req.params.id)
+      if (!restaurant) throw new Error("Restaurant didn't exist!")
+
+      await restaurant.destroy()
       return res.redirect('/admin/restaurants')
     } catch (err) {
       next(err)
