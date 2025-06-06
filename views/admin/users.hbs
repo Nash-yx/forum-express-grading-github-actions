@@ -23,15 +23,12 @@
               <td>
                 {{#if this.isAdmin}}
                 <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
-                  <button type="button" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">
-                      set as user
+                  <button type="submit" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">set as user
                   </button>
                 </form>
-                
                 {{else}}
                 <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
-                  <button type="button" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">
-                      set as admin
+                  <button type="submit" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">set as admin
                   </button>
                 </form>
                 {{/if}}
