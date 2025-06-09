@@ -1,43 +1,42 @@
-{{> restaurants-users-switch}}
-<div class="container-fluid py-4">
-  <div class="card">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-striped table-hover">
-          <thead class="table-dark">
-              <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Role</th>
-                  <th scope="col">#</th>
-              </tr>
-          </thead>
-          <tbody>
-            {{#each users}}
-            <tr>
-              <td>{{this.id}}</td>
-              <td>{{this.name}}</td>
-              <td>{{this.email}}</td>
-              <td>{{#if this.isAdmin}}admin{{else}}user{{/if}}</td>
-              <td>
-                {{#if this.isAdmin}}
-                <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
-                  <button type="submit" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">set as user
-                  </button>
-                </form>
-                {{else}}
-                <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
-                  <button type="submit" class="btn btn-link btn-sm text-primary p-0" onclick="return confirm(`確定要調整{{ this.name }}的權限嗎？`)">set as admin
-                  </button>
-                </form>
-                {{/if}}
-              </td>
-            </tr>
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
+{{>admin-tabs route='users'}}
+
+<table class="table align-middle">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Role</th>
+      <th scope="col">#</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each users}}
+      <tr>
+        <th scope="row">{{this.id}}</th>
+        <td>{{this.name}}</td>
+        <td>{{this.email}}</td>
+        <td>
+          {{#if this.isAdmin }}
+            admin
+          {{else}}
+            user
+          {{/if}}
+        </td>
+        <td>
+          {{#if this.isAdmin}}
+            <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
+              <input type="hidden" name="isAdmin" value="false" />
+              <button type="submit" class="btn btn-link link-danger">Set as User</button>
+            </form>
+          {{else}}
+            <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
+              <input type="hidden" name="isAdmin" value="true" />
+              <button type="submit" class="btn btn-link link-danger">Set as Admin</button>
+            </form>
+          {{/if}}
+        </td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
