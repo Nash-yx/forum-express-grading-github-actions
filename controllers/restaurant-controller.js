@@ -47,8 +47,12 @@ const restaurantController = {
         include: [
           Category,
           { model: Comment, include: User }
+        ],
+        order: [
+          [Comment, 'createdAt', 'DESC']
         ]
       })
+      console.log(restaurant.toJSON())
       if (!restaurant) throw new Error("Restaurant didn't exist!")
       const result = await restaurant.increment('viewCount')
       return res.render('restaurant', { restaurant: result.toJSON() })
