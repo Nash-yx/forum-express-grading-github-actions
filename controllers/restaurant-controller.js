@@ -43,6 +43,7 @@ const restaurantController = {
   },
   getRestaurant: async (req, res, next) => {
     try {
+      console.log('req.user:', req.user)
       const restaurant = await Restaurant.findByPk(req.params.id, {
         include: [
           Category,
@@ -52,7 +53,6 @@ const restaurantController = {
           [Comment, 'createdAt', 'DESC']
         ]
       })
-      console.log(restaurant.toJSON())
       if (!restaurant) throw new Error("Restaurant didn't exist!")
       const result = await restaurant.increment('viewCount')
       return res.render('restaurant', { restaurant: result.toJSON() })
