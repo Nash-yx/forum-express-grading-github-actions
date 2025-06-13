@@ -27,10 +27,11 @@ passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findByPk(id, {
       include: [
-        { model: Restaurant, as: 'FavoritedRestaurants' }
-        // or 'FavoritedRestaurants'
+        { model: Restaurant, as: 'FavoritedRestaurants' }, // or 'FavoritedRestaurants'
+        { model: Restaurant, as: 'LikedRestaurants' }
       ]
     })
+    // console.log(user.toJSON())
     return done(null, user.toJSON())
   } catch (err) {
     done(err)

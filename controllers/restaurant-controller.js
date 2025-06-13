@@ -1,5 +1,6 @@
 const { Restaurant, Category, Comment, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+
 const restaurantController = {
   getRestaurants: async (req, res, next) => {
     try {
@@ -28,10 +29,12 @@ const restaurantController = {
         Category.findAll({ raw: true })
       ])
       const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
+      const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(like => like.id)
       const data = restaurants.rows.map(r => ({
         ...r,
         description: r.description.substring(0, 50),
-        isFavorited: favoritedRestaurantsId.includes(r.id)
+        isFavorited: favoritedRestaurantsId.includes(r.id),
+        isLiked: likedRestaurantsId.includes(r.id)
       }))
       return res.render('restaurants', {
         restaurants: data,
@@ -49,7 +52,8 @@ const restaurantController = {
         include: [
           Category,
           { model: Comment, include: User },
-          { model: User, as: 'FavoritedUsers' }
+          { model: User, as: 'FavoritedUsers' },
+          { model: User, as: 'LikedUsers' }
         ],
         order: [
           [Comment, 'createdAt', 'DESC']
@@ -58,7 +62,8 @@ const restaurantController = {
       if (!restaurant) throw new Error("Restaurant didn't exist!")
       const result = await restaurant.increment('viewCount')
       const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id) // some => 找到一個符合條件的項目，就會回傳true
-      return res.render('restaurant', { restaurant: result.toJSON(), isFavorited })
+      const isLiked = restaurant.LikedUsers.some(user => user.id === req.user.id)
+      return res.render('restaurant', { restaurant: result.toJSON(), isFavorited, isLiked })
     } catch (err) {
       next(err)
     }
