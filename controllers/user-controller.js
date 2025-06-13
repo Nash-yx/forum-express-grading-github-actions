@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const { User } = db
+const { User, Restaurant, Favorite } = require('../models')
 const { localFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -62,7 +61,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      if (Number(req.params.id) !== Number(req.user.id)) return res.redirect(`/users/${req.params.id}`)
+      if (Number(req.params.id) !== Number(req.user.id)) { return res.redirect(`/users/${req.params.id}`) }
       const { name } = req.body
       const { file } = req
 
@@ -78,6 +77,46 @@ const userController = {
       })
       req.flash('success_messages', '使用者資料編輯成功')
       return res.redirect(`/users/${req.params.id}`)
+    } catch (err) {
+      next(err)
+    }
+  },
+  addFavorite: async (req, res, next) => {
+    try {
+      const { restaurantId } = req.params
+      const [restaurant, favorite] = await Promise.all([
+        Restaurant.findByPk(restaurantId),
+        Favorite.findOne({
+          where: {
+            userId: req.user.id,
+            restaurantId
+          }
+        })
+      ])
+      if (!restaurant) throw new Error("Restaurant didn't exist!")
+      if (favorite) throw new Error('You have favorited this restaurant!')
+
+      await Favorite.create({
+        userId: req.user.id,
+        restaurantId
+      })
+      return res.redirect('back')
+    } catch (err) {
+      next(err)
+    }
+  },
+  removeFavorite: async (req, res, next) => {
+    try {
+      const favorite = await Favorite.findOne({
+        where: {
+          userId: req.user.id,
+          restaurantId: req.params.restaurantId
+        }
+      })
+      if (!favorite) throw new Error("You haven't favorited this restaurant!")
+
+      await favorite.destroy()
+      return res.redirect('back')
     } catch (err) {
       next(err)
     }
