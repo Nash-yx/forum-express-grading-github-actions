@@ -19,7 +19,7 @@ const restaurantController = {
           include: Category,
           // where,
           where: {
-            ...categoryId ? { categoryId } : {}
+            ...(categoryId ? { categoryId } : {})
           },
           limit,
           offset,
@@ -55,15 +55,21 @@ const restaurantController = {
           { model: User, as: 'FavoritedUsers' },
           { model: User, as: 'LikedUsers' }
         ],
-        order: [
-          [Comment, 'createdAt', 'DESC']
-        ]
+        order: [[Comment, 'createdAt', 'DESC']]
       })
       if (!restaurant) throw new Error("Restaurant didn't exist!")
       const result = await restaurant.increment('viewCount')
-      const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id) // some => 找到一個符合條件的項目，就會回傳true
-      const isLiked = restaurant.LikedUsers.some(user => user.id === req.user.id)
-      return res.render('restaurant', { restaurant: result.toJSON(), isFavorited, isLiked })
+      const isFavorited = restaurant.FavoritedUsers.some(
+        f => f.id === req.user.id
+      ) // some => 找到一個符合條件的項目，就會回傳true
+      const isLiked = restaurant.LikedUsers.some(
+        user => user.id === req.user.id
+      )
+      return res.render('restaurant', {
+        restaurant: result.toJSON(),
+        isFavorited,
+        isLiked
+      })
     } catch (err) {
       next(err)
     }
@@ -71,10 +77,7 @@ const restaurantController = {
   getDashboard: async (req, res, next) => {
     try {
       const restaurant = await Restaurant.findByPk(req.params.id, {
-        include: [
-          Category,
-          { model: Comment, include: User }
-        ]
+        include: [Category, { model: Comment, include: User }]
       })
       if (!restaurant) throw new Error("Restaurant didn't exist!")
       return res.render('dashboard', { restaurant: restaurant.toJSON() })
@@ -104,6 +107,31 @@ const restaurantController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTopRestaurants: async (req, res, next) => {
+    try {
+      const restaurants = await Restaurant.findAll({
+        include: [
+          { model: User, as: 'FavoritedUsers' }
+        ]
+      })
+      let result = restaurants.map(rest => {
+        return {
+          ...rest.dataValues,
+          description: rest.dataValues.description.substring(0, 50),
+          favoritedCount: rest.dataValues.FavoritedUsers.length,
+          isFavorited: req.user && req.user.FavoritedRestaurants.map(d => d.id).includes(rest.id)
+        }
+      })
+      result.sort((a, b) => b.favoritedCount - a.favoritedCount)
+      result = result.slice(0, 10)
+      return res.render('top-restaurants', { restaurants: result })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = restaurantController
+
+// [{user1}, {user2}, {user3}]
+// [1,2,3]
