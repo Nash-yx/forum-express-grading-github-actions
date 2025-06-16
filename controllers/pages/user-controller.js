@@ -1,6 +1,12 @@
 const bcrypt = require('bcryptjs')
-const { User, Restaurant, Favorite, Like, Followship } = require('../models')
-const { localFileHandler } = require('../helpers/file-helpers')
+const {
+  User,
+  Restaurant,
+  Favorite,
+  Like,
+  Followship
+} = require('../../models')
+const { localFileHandler } = require('../../helpers/file-helpers')
 
 const userController = {
   signUpPage: (req, res) => {
@@ -168,12 +174,15 @@ const userController = {
       const users = await User.findAll({
         include: [{ model: User, as: 'Followers' }]
       })
-      const result = users.map(user =>
-        ({
+      const result = users
+        .map(user => ({
           ...user.toJSON(),
           followerCount: user.Followers.length,
-          isFollowed: req.user.Followings.some(following => following.id === user.id)
-        })).sort((a, b) => b.followerCount - a.followerCount)
+          isFollowed: req.user.Followings.some(
+            following => following.id === user.id
+          )
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
       return res.render('top-users', { users: result })
     } catch (err) {
       next(err)
