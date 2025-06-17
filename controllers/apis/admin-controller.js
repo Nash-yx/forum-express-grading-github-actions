@@ -22,7 +22,18 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  postRestaurant: (req, res, next) => {
+    adminServices.postRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
+  // postRestaurant: async (req, res, next) => {
+  //   try {
+  //     const data = await adminServices.postRestaurant(req)
+  //     return res.json({ status: 'success', data })
+  //   } catch (err) {
+  //     next(err)
+  //   }
+  // }
 }
 
 module.exports = adminController

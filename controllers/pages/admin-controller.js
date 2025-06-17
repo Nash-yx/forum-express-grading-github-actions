@@ -4,9 +4,9 @@ const adminServices = require('../../services/admin-services')
 
 const adminController = {
   getRestaurants: async (req, res, next) => {
-    // adminServices.getRestaurants((err, data) => err ? next(err) : res.render('admin/restaurants', data))
-    const data = await adminServices.getRestaurants()
-    return res.render('admin/restaurants', data)
+    adminServices.getRestaurants((err, data) => err ? next(err) : res.render('admin/restaurants', data))
+    // const data = await adminServices.getRestaurants()
+    // return res.render('admin/restaurants', data)
   },
   createRestaurant: async (req, res, next) => {
     try {
@@ -17,28 +17,13 @@ const adminController = {
     }
   },
   postRestaurant: async (req, res, next) => {
-    try {
-      const { name, tel, address, openingHours, description, categoryId } =
-        req.body
-      if (!name) throw new Error('Restaurant name is required!')
+    adminController.postRestaurant(req, (err, data) => {
+      if (err) return next(err)
 
-      const { file } = req // const file = req.file
-      const filePath = await localFileHandler(file)
-
-      await Restaurant.create({
-        name,
-        tel,
-        address,
-        openingHours,
-        description,
-        image: filePath || null,
-        categoryId
-      })
       req.flash('success_messages', 'restaurant was successfully created')
+      req.session.createdData = data
       return res.redirect('/admin/restaurants')
-    } catch (err) {
-      next(err)
-    }
+    })
   },
   getRestaurant: async (req, res, next) => {
     try {

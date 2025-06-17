@@ -18,7 +18,10 @@ const SESSION_SECRET = 'secret'
 app.engine('hbs', handlebars({ extname: '.hbs', helpers: handlebarsHelpers }))
 app.set('view engine', 'hbs')
 app.set('views', './views')
+
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
 app.use(
   session({
     secret: SESSION_SECRET,
