@@ -1,7 +1,12 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
+
 const { User, Restaurant } = require('../models')
+
+const JWTStrategy = passportJWT.Strategy
+const ExtractJwt = passportJWT.ExtractJwt
 
 passport.use(
   new LocalStrategy(
@@ -18,6 +23,27 @@ passport.use(
       return done(null, user)
     })
 )
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // 設定去哪邊找 token, 這裡指定了authorization header 裡的 bearer 項目
+  secretOrKey: process.env.JWT_SECRET
+}
+
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id, {
+      include: [
+        { model: Restaurant, as: 'FavoritedRestaurants' },
+        { model: Restaurant, as: 'LikedRestaurants' },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+    return done(null, user)
+  } catch (err) {
+    done(err)
+  }
+}))
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
